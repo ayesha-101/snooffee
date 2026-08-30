@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { Navbar } from '@/sections/Navbar';
 import { Hero } from '@/sections/Hero';

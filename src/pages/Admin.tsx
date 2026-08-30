@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { PRODUCTS, Product, CATEGORIES } from '@/data/products';
+import { PRODUCTS, CATEGORIES } from '@/data/products';
+import type { Product } from '@/data/products';
 import { Trash2, Edit2, Plus, X } from 'lucide-react';
 
 const productSchema = z.object({
