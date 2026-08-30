@@ -102,8 +102,6 @@ function HomePage() {
         onSetQty={setQty}
         onRemove={removeItem}
       />
-
-      <Toaster position="bottom-center" dir="rtl" richColors />
     </div>
   );
 }
