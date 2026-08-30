@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, ChevronDown, Check, Truck, Package, AlertCircle } from 'lucide-react';
+import { ChevronDown, Check, Truck, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAllOrders, updateOrderStatus, type Order } from '@/lib/order-api';
 
