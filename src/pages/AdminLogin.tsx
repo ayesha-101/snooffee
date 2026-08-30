@@ -20,6 +20,7 @@ export function AdminLogin() {
 
       if (password === ADMIN_PASSWORD) {
         localStorage.setItem('admin_auth', 'true');
+        window.dispatchEvent(new CustomEvent('admin-login-success'));
         toast.success('تم تسجيل الدخول بنجاح');
         navigate('/admin');
       } else {

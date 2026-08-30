@@ -109,11 +109,22 @@ export default function App() {
     };
   });
 
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
+    return localStorage.getItem('admin_auth') === 'true';
+  });
+
+  useEffect(() => {
+    const handleAdminLogin = () => {
+      setIsAdminLoggedIn(true);
+    };
+
+    window.addEventListener('admin-login-success', handleAdminLogin);
+    return () => window.removeEventListener('admin-login-success', handleAdminLogin);
+  }, []);
+
   const handleLoginSuccess = (user: { email: string; name?: string }) => {
     setAuth({ isLoggedIn: true, user });
   };
-
-  const isAdminLoggedIn = localStorage.getItem('admin_auth') === 'true';
 
   return (
     <>
