@@ -1,10 +1,27 @@
-import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import { Minus, Plus, ShoppingBag, Trash2, X, CreditCard, Banknote } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
 import { WHATSAPP_NUMBER, type Product } from '@/data/products';
+import { sendEmailNotification, getOrderConfirmationEmail } from '@/lib/email-service';
+import { createOrder } from '@/lib/order-api';
 
 export interface CartItem {
   product: Product;
   qty: number;
 }
+
+const checkoutSchema = z.object({
+  email: z.string().email('البريد الإلكتروني غير صحيح'),
+  phone: z.string().min(7, 'رقم الهاتف غير صحيح'),
+  address: z.string().min(5, 'العنوان مطلوب'),
+  notes: z.string().optional(),
+  paymentMethod: z.enum(['cod', 'apple_pay']),
+});
+
+type CheckoutData = z.infer<typeof checkoutSchema>;
 
 interface CartDrawerProps {
   open: boolean;
@@ -15,8 +32,27 @@ interface CartDrawerProps {
   onCheckout?: () => void;
 }
 
-export function CartDrawer({ open, items, onClose, onSetQty, onRemove, onCheckout }: CartDrawerProps) {
+export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDrawerProps) {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<CheckoutData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      paymentMethod: 'cod',
+    },
+  });
+
+  const selectedPaymentMethod = watch('paymentMethod');
   const total = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+  const shippingPrice = total > 200 ? 0 : 25;
+  const finalTotal = total + shippingPrice;
 
   const checkoutWhatsApp = () => {
     const lines = items
@@ -24,6 +60,53 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove, onCheckou
       .join('\n');
     const message = `مرحباً، أود إتمام طلبي من snooffee:\n\n${lines}\n\nالإجمالي: ${total} د.إ`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const onSubmitCheckout = async (data: CheckoutData) => {
+    setIsProcessing(true);
+    try {
+      const order = {
+        id: Date.now().toString(),
+        orderNo: `ORD-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        notes: data.notes || '',
+        paymentMethod: data.paymentMethod,
+        paymentStatus: 'pending' as const,
+        status: 'pending' as const,
+        totalPrice: finalTotal,
+        items: items.map((item) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.qty,
+          price: item.product.price,
+        })),
+        createdAt: new Date().toISOString(),
+      };
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const createdOrder = createOrder(order);
+
+      const userData = {
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+      };
+
+      const emailNotification = getOrderConfirmationEmail(createdOrder, userData);
+      await sendEmailNotification(emailNotification);
+
+      toast.success('تم تأكيد الطلب بنجاح! تحقق من بريدك الإلكتروني.');
+      reset();
+      setShowCheckout(false);
+      onClose();
+    } catch (error) {
+      toast.error('حدث خطأ أثناء معالجة الطلب');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!open) return null;
@@ -69,7 +152,7 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove, onCheckou
               ابدأ التسوق
             </button>
           </div>
-        ) : (
+        ) : !showCheckout ? (
           <>
             <ul className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
               {items.map(({ product, qty }) => (
@@ -133,32 +216,167 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove, onCheckou
               </div>
               <p className="mt-1 text-xs text-coffee-500">شحن مجاني للطلبات فوق 200 د.إ</p>
               <div className="mt-4 space-y-3">
-                {onCheckout && (
-                  <>
-                    <button
-                      onClick={() => {
-                        onCheckout();
-                        onClose();
-                      }}
-                      className="w-full rounded-full bg-coffee-600 py-3.5 font-bold text-coffee-50 shadow-lg shadow-coffee-600/25 transition-colors hover:bg-coffee-700"
-                    >
-                      إتمام الشراء
-                    </button>
-                    <p className="text-center text-[11px] text-coffee-500">
-                      ادفع بآمان باستخدام بطاقتك أو الدفع عند الاستلام
-                    </p>
-                  </>
-                )}
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  className="w-full rounded-full bg-coffee-600 py-3.5 font-bold text-coffee-50 shadow-lg shadow-coffee-600/25 transition-colors hover:bg-coffee-700"
+                >
+                  إتمام الشراء
+                </button>
+                <p className="text-center text-[11px] text-coffee-500">
+                  ادفع بآمان باستخدام بطاقتك أو الدفع عند الاستلام
+                </p>
                 <button
                   onClick={checkoutWhatsApp}
                   className="w-full rounded-full bg-green-600 py-3.5 font-bold text-white shadow-lg shadow-green-600/25 transition-colors hover:bg-green-700"
                 >
-                  {onCheckout ? 'أو ' : ''}إتمام الطلب عبر واتساب
+                  أو إتمام الطلب عبر واتساب
                 </button>
                 <p className="text-center text-[11px] text-coffee-500">
                   سيتم تحويلك إلى واتساب لتأكيد طلبك
                 </p>
               </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Checkout Form */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <button
+                onClick={() => setShowCheckout(false)}
+                className="mb-4 text-coffee-600 hover:text-coffee-700 font-medium text-sm flex items-center gap-1"
+              >
+                ← العودة إلى السلة
+              </button>
+
+              <form onSubmit={handleSubmit(onSubmitCheckout)} className="space-y-4">
+                {/* Order Summary */}
+                <div className="bg-coffee-50 rounded-lg p-4 mb-4">
+                  <h3 className="font-bold text-coffee-900 mb-3">ملخص الطلب</h3>
+                  <div className="space-y-2 mb-3">
+                    {items.map((item) => (
+                      <div key={item.product.id} className="flex justify-between text-sm text-coffee-700">
+                        <span>{item.product.name} × {item.qty}</span>
+                        <span>د.إ {(item.product.price * item.qty).toLocaleString('ar-AE')}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="border-t border-coffee-200 pt-2 space-y-1 text-sm">
+                    <div className="flex justify-between text-coffee-700">
+                      <span>المجموع</span>
+                      <span>د.إ {total.toLocaleString('ar-AE')}</span>
+                    </div>
+                    <div className="flex justify-between text-coffee-700">
+                      <span>الشحن {total > 200 ? '(مجاني)' : ''}</span>
+                      <span className={total > 200 ? 'text-green-600 font-semibold' : ''}>
+                        د.إ {shippingPrice.toLocaleString('ar-AE')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold text-coffee-900 pt-2 border-t">
+                      <span>الإجمالي</span>
+                      <span>د.إ {finalTotal.toLocaleString('ar-AE')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-coffee-900 mb-1">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    {...register('email')}
+                    className="w-full rounded-lg border border-coffee-200 px-3 py-2 text-sm text-coffee-900"
+                    placeholder="your@email.com"
+                  />
+                  {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>}
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-medium text-coffee-900 mb-1">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    {...register('phone')}
+                    className="w-full rounded-lg border border-coffee-200 px-3 py-2 text-sm text-coffee-900"
+                    placeholder="+971 50 000 0000"
+                  />
+                  {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone.message}</p>}
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className="block text-sm font-medium text-coffee-900 mb-1">العنوان</label>
+                  <textarea
+                    {...register('address')}
+                    className="w-full rounded-lg border border-coffee-200 px-3 py-2 text-sm text-coffee-900"
+                    placeholder="دبي، الإمارات"
+                    rows={2}
+                  />
+                  {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address.message}</p>}
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-coffee-900 mb-1">ملاحظات (اختياري)</label>
+                  <textarea
+                    {...register('notes')}
+                    className="w-full rounded-lg border border-coffee-200 px-3 py-2 text-sm text-coffee-900"
+                    placeholder="أي ملاحظات أو تعليمات توصيل خاصة"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Payment Method */}
+                <div>
+                  <label className="block text-sm font-medium text-coffee-900 mb-2">طريقة الدفع</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center p-3 border border-coffee-200 rounded-lg cursor-pointer hover:bg-coffee-50"
+                      style={selectedPaymentMethod === 'cod' ? { borderColor: 'var(--coffee-600)', backgroundColor: '#FEF3EB' } : {}}
+                    >
+                      <input
+                        type="radio"
+                        {...register('paymentMethod')}
+                        value="cod"
+                        className="ml-3"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Banknote size={16} className="text-coffee-600" />
+                          <span className="font-semibold text-sm text-coffee-900">الدفع عند الاستلام</span>
+                        </div>
+                        <p className="text-xs text-coffee-600 mt-1">ادفع عند استلام طلبك</p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-3 border border-coffee-200 rounded-lg cursor-pointer hover:bg-coffee-50"
+                      style={selectedPaymentMethod === 'apple_pay' ? { borderColor: 'var(--coffee-600)', backgroundColor: '#FEF3EB' } : {}}
+                    >
+                      <input
+                        type="radio"
+                        {...register('paymentMethod')}
+                        value="apple_pay"
+                        className="ml-3"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CreditCard size={16} className="text-coffee-600" />
+                          <span className="font-semibold text-sm text-coffee-900">Apple Pay</span>
+                        </div>
+                        <p className="text-xs text-coffee-600 mt-1">ادفع بشكل آمن</p>
+                      </div>
+                    </label>
+                  </div>
+                  {errors.paymentMethod && <p className="text-xs text-red-600 mt-1">{errors.paymentMethod.message}</p>}
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full bg-coffee-600 hover:bg-coffee-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition-colors mt-4"
+                >
+                  {isProcessing ? 'جاري معالجة الطلب...' : `تأكيد الطلب - د.إ ${finalTotal.toLocaleString('ar-AE')}`}
+                </button>
+              </form>
             </div>
           </>
         )}
