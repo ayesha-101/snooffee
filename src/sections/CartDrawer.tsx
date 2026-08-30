@@ -12,12 +12,13 @@ interface CartDrawerProps {
   onClose: () => void;
   onSetQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
+  onCheckout?: () => void;
 }
 
-export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDrawerProps) {
+export function CartDrawer({ open, items, onClose, onSetQty, onRemove, onCheckout }: CartDrawerProps) {
   const total = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
 
-  const checkout = () => {
+  const checkoutWhatsApp = () => {
     const lines = items
       .map((i) => `• ${i.product.name} (${i.product.size}) × ${i.qty} = ${i.product.price * i.qty} د.إ`)
       .join('\n');
@@ -131,15 +132,33 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDra
                 </span>
               </div>
               <p className="mt-1 text-xs text-coffee-500">شحن مجاني للطلبات فوق 200 د.إ</p>
-              <button
-                onClick={checkout}
-                className="mt-4 w-full rounded-full bg-coffee-600 py-3.5 font-bold text-coffee-50 shadow-lg shadow-coffee-600/25 transition-colors hover:bg-coffee-700"
-              >
-                إتمام الطلب عبر واتساب
-              </button>
-              <p className="mt-2 text-center text-[11px] text-coffee-500">
-                سيتم تحويلك إلى واتساب لتأكيد طلبك وإتمام الدفع
-              </p>
+              <div className="mt-4 space-y-3">
+                {onCheckout && (
+                  <>
+                    <button
+                      onClick={() => {
+                        onCheckout();
+                        onClose();
+                      }}
+                      className="w-full rounded-full bg-coffee-600 py-3.5 font-bold text-coffee-50 shadow-lg shadow-coffee-600/25 transition-colors hover:bg-coffee-700"
+                    >
+                      إتمام الشراء
+                    </button>
+                    <p className="text-center text-[11px] text-coffee-500">
+                      ادفع بآمان باستخدام بطاقتك أو الدفع عند الاستلام
+                    </p>
+                  </>
+                )}
+                <button
+                  onClick={checkoutWhatsApp}
+                  className="w-full rounded-full bg-green-600 py-3.5 font-bold text-white shadow-lg shadow-green-600/25 transition-colors hover:bg-green-700"
+                >
+                  {onCheckout ? 'أو ' : ''}إتمام الطلب عبر واتساب
+                </button>
+                <p className="text-center text-[11px] text-coffee-500">
+                  سيتم تحويلك إلى واتساب لتأكيد طلبك
+                </p>
+              </div>
             </div>
           </>
         )}
