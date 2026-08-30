@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Package, Grid3x3, LogOut, Phone, ShoppingCart, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Admin as AdminProducts } from './Admin';
 import { AdminCategories } from './AdminCategories';
 import { AdminContact } from './AdminContact';
@@ -7,7 +9,14 @@ import { AdminOrders } from './AdminOrders';
 import { AdminStatistics } from './AdminStatistics';
 
 export function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'contact' | 'orders' | 'statistics'>('statistics');
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
+    toast.success('تم تسجيل الخروج بنجاح');
+    navigate('/admin');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
@@ -20,6 +29,7 @@ export function AdminDashboard() {
               <p className="mt-2 text-coffee-200">سنووفي - إدارة المتجر</p>
             </div>
             <button
+              onClick={handleLogout}
               className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700 transition-colors shadow-lg"
             >
               <LogOut size={20} />

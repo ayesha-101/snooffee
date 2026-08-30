@@ -9,6 +9,7 @@ import { Features } from '@/sections/Features';
 import { Footer } from '@/sections/Footer';
 import { CartDrawer, type CartItem } from '@/sections/CartDrawer';
 import { AdminDashboard } from '@/pages/AdminDashboard';
+import { AdminLogin } from '@/pages/AdminLogin';
 import { Auth } from '@/pages/Auth';
 import { CustomerDashboard } from '@/pages/CustomerDashboard';
 import { Checkout } from '@/pages/Checkout';
@@ -112,6 +113,8 @@ export default function App() {
     setAuth({ isLoggedIn: true, user });
   };
 
+  const isAdminLoggedIn = localStorage.getItem('admin_auth') === 'true';
+
   return (
     <>
       <Routes>
@@ -119,7 +122,7 @@ export default function App() {
         <Route path="/auth" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/dashboard" element={auth.isLoggedIn ? <CustomerDashboard /> : <Auth onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={isAdminLoggedIn ? <AdminDashboard /> : <AdminLogin />} />
       </Routes>
       <Toaster position="bottom-center" dir="rtl" richColors />
     </>
