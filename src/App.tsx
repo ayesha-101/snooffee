@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { Navbar } from '@/sections/Navbar';
 import { Hero } from '@/sections/Hero';
@@ -7,13 +8,14 @@ import { Story } from '@/sections/Story';
 import { Features } from '@/sections/Features';
 import { Footer } from '@/sections/Footer';
 import { CartDrawer, type CartItem } from '@/sections/CartDrawer';
+import { Admin } from '@/pages/Admin';
 import { PRODUCTS, type Product } from '@/data/products';
 
 const MARQUEE_ITEMS = [
   'تحميص طازج يومياً',
   'محاصيل عربيكا 100%',
-  'شحن مجاني فوق 150 ر.س',
-  'انتقاء يدوي من المصدر',
+  'شحن مجاني فوق 200 د.إ',
+  'توصيل في دبي والإمارات',
   'خلطات سنووفي الخاصة',
   'تقطير بارد جاهز',
 ];
@@ -36,7 +38,7 @@ function loadCart(): CartItem[] {
   }
 }
 
-export default function App() {
+function HomePage() {
   const [cart, setCart] = useState<CartItem[]>(loadCart);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -103,5 +105,17 @@ export default function App() {
 
       <Toaster position="bottom-center" dir="rtl" richColors />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+      <Toaster position="bottom-center" dir="rtl" richColors />
+    </BrowserRouter>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Menu, ShoppingBag, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, ShoppingBag, X, Settings } from 'lucide-react';
 
 const LINKS = [
   { href: '#home', label: 'الرئيسية' },
@@ -61,6 +62,15 @@ export function Navbar({ cartCount, onOpenCart }: NavbarProps) {
         </ul>
 
         <div className="flex items-center gap-2">
+          {/* رابط الإدارة */}
+          <Link
+            to="/admin"
+            aria-label="لوحة التحكم"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-600 text-white shadow-md transition-transform hover:scale-105 hover:bg-gray-700"
+          >
+            <Settings className="h-5 w-5" />
+          </Link>
+
           {/* زر السلة */}
           <button
             onClick={onOpenCart}

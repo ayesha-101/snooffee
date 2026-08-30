@@ -92,5 +92,8 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-// رقم الواتساب لاستقبال الطلبات — استبدله برقم المتجر
-export const WHATSAPP_NUMBER = '966500000000';
+// UAE WhatsApp number for orders
+export const WHATSAPP_NUMBER = '971501234567';
+export const CURRENCY = 'AED';
+export const COMPANY_NAME = 'Snooffee Coffee - دبي';
+export const COUNTRY = 'الإمارات العربية المتحدة';
