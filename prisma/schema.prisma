@@ -20,6 +20,21 @@ model Category {
   @@map("categories")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders    Order[]
+
+  @@map("users")
+}
+
 model Product {
   id         String   @id
   name       String
@@ -35,5 +50,43 @@ model Product {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  orderItems OrderItem[]
+
   @@map("products")
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items         OrderItem[]
+  totalPrice    Float
+  status        String   @default("pending") // pending, confirmed, shipped, delivered
+  paymentMethod String   // cod, apple_pay
+  paymentStatus String   @default("pending") // pending, completed, failed
+
+  email         String
+  phone         String
+  address       String
+  notes         String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  quantity  Int
+  price     Float
+
+  @@map("order_items")
 }
