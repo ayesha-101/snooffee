@@ -19,8 +19,9 @@ export function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('admin_auth');
+    window.dispatchEvent(new CustomEvent('admin-logout'));
     toast.success('تم تسجيل الخروج بنجاح');
-    navigate('/admin');
+    navigate('/');
   };
 
   return (

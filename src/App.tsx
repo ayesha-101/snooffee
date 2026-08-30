@@ -118,8 +118,16 @@ export default function App() {
       setIsAdminLoggedIn(true);
     };
 
+    const handleAdminLogout = () => {
+      setIsAdminLoggedIn(false);
+    };
+
     window.addEventListener('admin-login-success', handleAdminLogin);
-    return () => window.removeEventListener('admin-login-success', handleAdminLogin);
+    window.addEventListener('admin-logout', handleAdminLogout);
+    return () => {
+      window.removeEventListener('admin-login-success', handleAdminLogin);
+      window.removeEventListener('admin-logout', handleAdminLogout);
+    };
   }, []);
 
   const handleLoginSuccess = (user: { email: string; name?: string }) => {
