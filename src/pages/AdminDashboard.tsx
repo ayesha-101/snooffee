@@ -7,20 +7,20 @@ import { AdminOrders } from './AdminOrders';
 import { AdminStatistics } from './AdminStatistics';
 
 export function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'contact' | 'orders' | 'statistics'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'contact' | 'orders' | 'statistics'>('statistics');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <header className="border-b border-coffee-900/30 bg-gradient-to-r from-coffee-900 to-coffee-800 shadow-lg">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم - سنووفي</h1>
-              <p className="mt-1 text-gray-600">إدارة المنتجات والأقسام</p>
+              <h1 className="text-4xl font-extrabold text-white">لوحة التحكم</h1>
+              <p className="mt-2 text-coffee-200">سنووفي - إدارة المتجر</p>
             </div>
             <button
-              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700 transition-colors shadow-lg"
             >
               <LogOut size={20} />
               تسجيل خروج
@@ -30,15 +30,37 @@ export function AdminDashboard() {
       </header>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 bg-white overflow-x-auto">
+      <div className="border-b border-coffee-900/30 bg-gray-800/50 backdrop-blur overflow-x-auto sticky top-0 z-40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-8 min-w-max md:min-w-0">
+          <div className="flex gap-1 min-w-max md:min-w-0">
+            <button
+              onClick={() => setActiveTab('statistics')}
+              className={`flex items-center gap-2 px-4 py-4 font-semibold transition-all whitespace-nowrap rounded-t-lg ${
+                activeTab === 'statistics'
+                  ? 'bg-coffee-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <BarChart3 size={20} />
+              الإحصائيات
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex items-center gap-2 px-4 py-4 font-semibold transition-all whitespace-nowrap rounded-t-lg ${
+                activeTab === 'orders'
+                  ? 'bg-coffee-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <ShoppingCart size={20} />
+              الطلبات
+            </button>
             <button
               onClick={() => setActiveTab('products')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-4 font-semibold transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-4 font-semibold transition-all whitespace-nowrap rounded-t-lg ${
                 activeTab === 'products'
-                  ? 'border-coffee-600 text-coffee-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-coffee-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
               }`}
             >
               <Package size={20} />
@@ -46,43 +68,21 @@ export function AdminDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('categories')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-4 font-semibold transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-4 font-semibold transition-all whitespace-nowrap rounded-t-lg ${
                 activeTab === 'categories'
-                  ? 'border-coffee-600 text-coffee-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-coffee-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
               }`}
             >
               <Grid3x3 size={20} />
               الأقسام
             </button>
             <button
-              onClick={() => setActiveTab('orders')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-4 font-semibold transition-colors whitespace-nowrap ${
-                activeTab === 'orders'
-                  ? 'border-coffee-600 text-coffee-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <ShoppingCart size={20} />
-              الطلبات
-            </button>
-            <button
-              onClick={() => setActiveTab('statistics')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-4 font-semibold transition-colors whitespace-nowrap ${
-                activeTab === 'statistics'
-                  ? 'border-coffee-600 text-coffee-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <BarChart3 size={20} />
-              الإحصائيات
-            </button>
-            <button
               onClick={() => setActiveTab('contact')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-4 font-semibold transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-4 font-semibold transition-all whitespace-nowrap rounded-t-lg ${
                 activeTab === 'contact'
-                  ? 'border-coffee-600 text-coffee-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-coffee-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
               }`}
             >
               <Phone size={20} />
@@ -93,12 +93,14 @@ export function AdminDashboard() {
       </div>
 
       {/* Content */}
-      <div>
-        {activeTab === 'products' && <AdminProducts />}
-        {activeTab === 'categories' && <AdminCategories />}
-        {activeTab === 'orders' && <AdminOrders />}
-        {activeTab === 'statistics' && <AdminStatistics />}
-        {activeTab === 'contact' && <AdminContact />}
+      <div className="min-h-screen pb-12">
+        <div className="animate-fade-in">
+          {activeTab === 'products' && <AdminProducts />}
+          {activeTab === 'categories' && <AdminCategories />}
+          {activeTab === 'orders' && <AdminOrders />}
+          {activeTab === 'statistics' && <AdminStatistics />}
+          {activeTab === 'contact' && <AdminContact />}
+        </div>
       </div>
     </div>
   );

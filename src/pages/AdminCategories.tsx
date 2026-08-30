@@ -15,7 +15,7 @@ interface Category {
 const categorySchema = z.object({
   id: z.string().min(1, 'معرّف القسم مطلوب'),
   name: z.string().min(1, 'اسم القسم مطلوب'),
-  image: z.string().url('رابط الصورة غير صحيح'),
+  image: z.string().min(1, 'الصورة مطلوبة'),
   desc: z.string().optional(),
 });
 
@@ -46,6 +46,7 @@ export function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -63,14 +64,29 @@ export function AdminCategories() {
     },
   });
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setValue('image', result);
+        setImagePreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const openModal = (category?: Category) => {
     if (category) {
       setEditingId(category.id);
+      setImagePreview(category.image);
       Object.keys(category).forEach((key) => {
         setValue(key as keyof CategoryFormData, category[key as keyof Category] as any);
       });
     } else {
       setEditingId(null);
+      setImagePreview(null);
       reset();
     }
     setIsModalOpen(true);
@@ -79,6 +95,7 @@ export function AdminCategories() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
+    setImagePreview(null);
     reset();
   };
 
@@ -225,16 +242,28 @@ export function AdminCategories() {
 
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-900">
-                      رابط الصورة *
+                      الصورة *
                     </label>
-                    <input
-                      type="url"
-                      {...register('image')}
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900"
-                      placeholder="مثال: /images/crops.jpg"
-                    />
-                    {errors.image && (
-                      <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>
+                    <div className="mt-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900"
+                      />
+                      {errors.image && (
+                        <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>
+                      )}
+                    </div>
+                    {imagePreview && (
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm font-medium text-gray-700">معاينة الصورة:</p>
+                        <img
+                          src={imagePreview}
+                          alt="معاينة"
+                          className="h-32 w-full rounded-lg object-cover"
+                        />
+                      </div>
                     )}
                   </div>
 

@@ -15,7 +15,7 @@ const productSchema = z.object({
   roast: z.string().min(1, 'درجة التحميص مطلوبة'),
   size: z.string().min(1, 'الحجم مطلوب'),
   price: z.number().positive('السعر يجب أن يكون أكبر من 0'),
-  image: z.string().url('رابط الصورة غير صحيح'),
+  image: z.string().min(1, 'الصورة مطلوبة'),
   category: z.enum(['crops', 'blends', 'drinks']),
   badge: z.string().optional(),
 });
@@ -26,6 +26,7 @@ export function Admin() {
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -51,6 +52,19 @@ export function Admin() {
         },
   });
 
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setValue('image', result);
+        setImagePreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const stats = useMemo(() => {
     return {
       total: products.length,
@@ -63,11 +77,13 @@ export function Admin() {
   const openModal = (product?: Product) => {
     if (product) {
       setEditingId(product.id);
+      setImagePreview(product.image);
       Object.keys(product).forEach((key) => {
         setValue(key as keyof ProductFormData, product[key as keyof Product] as any);
       });
     } else {
       setEditingId(null);
+      setImagePreview(null);
       reset({
         id: '',
         name: '',
@@ -86,6 +102,7 @@ export function Admin() {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setImagePreview(null);
     setEditingId(null);
     reset();
   };
@@ -344,16 +361,28 @@ export function Admin() {
 
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-900">
-                      رابط الصورة *
+                      الصورة *
                     </label>
-                    <input
-                      type="url"
-                      {...register('image')}
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900"
-                      placeholder="مثال: /images/p-ethiopia.jpg"
-                    />
-                    {errors.image && (
-                      <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>
+                    <div className="mt-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900"
+                      />
+                      {errors.image && (
+                        <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>
+                      )}
+                    </div>
+                    {imagePreview && (
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm font-medium text-gray-700">معاينة الصورة:</p>
+                        <img
+                          src={imagePreview}
+                          alt="معاينة"
+                          className="h-32 w-full rounded-lg object-cover"
+                        />
+                      </div>
                     )}
                   </div>
 
