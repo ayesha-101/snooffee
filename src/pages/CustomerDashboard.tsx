@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ShoppingBag, MapPin, Phone, Mail } from 'lucide-react';
+import { LogOut, ShoppingBag, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserOrders } from '@/lib/order-api';
 
@@ -48,8 +48,8 @@ export function CustomerDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/auth');
     toast.success('تم تسجيل الخروج بنجاح');
+    navigate('/');
   };
 
   const getStatusBadge = (status: string) => {
@@ -81,6 +81,13 @@ export function CustomerDashboard() {
       <div className="bg-gradient-to-r from-coffee-800 to-coffee-600 text-white py-6 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div>
+            <button
+              onClick={() => navigate('/')}
+              className="mb-3 flex items-center gap-2 text-coffee-100 hover:text-white transition-colors group"
+            >
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              <span className="text-sm font-medium">العودة للمتجر</span>
+            </button>
             <h1 className="text-3xl font-bold mb-2">مرحباً {user.name}</h1>
             <p className="text-coffee-100">لوحة تحكم العميل</p>
           </div>

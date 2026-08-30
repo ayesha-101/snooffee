@@ -121,7 +121,7 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-coffee-900 to-coffee-700 py-12 px-4 flex items-center justify-center" dir="rtl">
-        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(true)} onLoginSuccess={handleAuthSuccess} />
+        <AuthModal isOpen={showAuthModal} onClose={() => navigate('/')} onLoginSuccess={handleAuthSuccess} />
       </div>
     );
   }
