@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +8,7 @@ import { ArrowRight, CreditCard, Banknote } from 'lucide-react';
 import type { CartItem } from '@/sections/CartDrawer';
 import { sendEmailNotification, getOrderConfirmationEmail } from '@/lib/email-service';
 import { createOrder } from '@/lib/order-api';
+import { AuthModal } from '@/sections/AuthModal';
 
 const checkoutSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صحيح'),
@@ -28,6 +29,17 @@ interface CheckoutProps {
 export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps) {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<{ email: string; name?: string } | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      setShowAuthModal(true);
+    }
+  }, []);
 
   const {
     register,
@@ -47,10 +59,14 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
   const shippingPrice = totalPrice > 200 ? 0 : 25;
   const finalTotal = totalPrice + shippingPrice;
 
+  const handleAuthSuccess = (userData: { email: string; name?: string }) => {
+    setUser(userData);
+    setShowAuthModal(false);
+  };
+
   const onSubmit = async (data: CheckoutData) => {
     setIsProcessing(true);
     try {
-      // Create order object
       const order = {
         id: Date.now().toString(),
         orderNo: `ORD-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
@@ -71,14 +87,12 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
         createdAt: new Date().toISOString(),
       };
 
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Update user data with contact info
-      const user = localStorage.getItem('user');
+      const currentUser = localStorage.getItem('user');
       let userData = { name: '', email: data.email };
-      if (user) {
-        const parsedUser = JSON.parse(user);
+      if (currentUser) {
+        const parsedUser = JSON.parse(currentUser);
         userData = {
           ...parsedUser,
           phone: data.phone,
@@ -87,12 +101,10 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
         localStorage.setItem('user', JSON.stringify(userData));
       }
 
-      // Create order using API
       const createdOrder = createOrder({
         ...order,
       });
 
-      // Send order confirmation email
       const emailNotification = getOrderConfirmationEmail(createdOrder, userData);
       await sendEmailNotification(emailNotification);
 
@@ -105,6 +117,14 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
       setIsProcessing(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-coffee-900 to-coffee-700 py-12 px-4 flex items-center justify-center" dir="rtl">
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(true)} onLoginSuccess={handleAuthSuccess} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-coffee-900 to-coffee-700 py-12 px-4" dir="rtl">

@@ -118,7 +118,7 @@ export default function App() {
         <Route path="/" element={<HomePageWrapper />} />
         <Route path="/auth" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/dashboard" element={auth.isLoggedIn ? <CustomerDashboard /> : <Auth onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/checkout" element={auth.isLoggedIn ? <CheckoutPage /> : <CheckoutAuthWrapper onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
       <Toaster position="bottom-center" dir="rtl" richColors />
@@ -173,10 +173,3 @@ function removeItem(id: string, _cart: CartItem[], setCart: (items: CartItem[] |
   setCart((prev: CartItem[]) => prev.filter((i) => i.product.id !== id));
 }
 
-interface CheckoutAuthWrapperProps {
-  onLoginSuccess: (user: { email: string; name?: string }) => void;
-}
-
-function CheckoutAuthWrapper({ onLoginSuccess }: CheckoutAuthWrapperProps) {
-  return <Auth onLoginSuccess={onLoginSuccess} />;
-}
