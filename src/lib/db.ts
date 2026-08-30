@@ -1,6 +1,8 @@
 import type { Product } from '@/data/products';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = typeof window !== 'undefined'
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000/api')
+  : 'http://localhost:3000/api';
 
 export async function getProducts(): Promise<Product[]> {
   try {

@@ -8,7 +8,7 @@ import { Story } from '@/sections/Story';
 import { Features } from '@/sections/Features';
 import { Footer } from '@/sections/Footer';
 import { CartDrawer, type CartItem } from '@/sections/CartDrawer';
-import { Admin } from '@/pages/Admin';
+import { AdminDashboard } from '@/pages/AdminDashboard';
 import { PRODUCTS, type Product } from '@/data/products';
 
 const MARQUEE_ITEMS = [
@@ -111,7 +111,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
       <Toaster position="bottom-center" dir="rtl" richColors />
     </>

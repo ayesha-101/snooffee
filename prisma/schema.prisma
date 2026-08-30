@@ -7,19 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Product {
+model Category {
   id        String   @id
-  name      String
-  desc      String
-  notes     String
-  roast     String
-  size      String
-  price     Float
+  name      String   @unique
   image     String
-  category  String
-  badge     String?
+  desc      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id         String   @id
+  name       String
+  desc       String
+  notes      String
+  roast      String
+  size       String
+  price      Float
+  image      String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  badge      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("products")
 }
