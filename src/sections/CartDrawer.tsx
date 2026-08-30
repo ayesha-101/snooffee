@@ -19,9 +19,9 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDra
 
   const checkout = () => {
     const lines = items
-      .map((i) => `• ${i.product.name} (${i.product.size}) × ${i.qty} = ${i.product.price * i.qty} ر.س`)
+      .map((i) => `• ${i.product.name} (${i.product.size}) × ${i.qty} = ${i.product.price * i.qty} د.إ`)
       .join('\n');
-    const message = `مرحباً، أود إتمام طلبي من snooffee:\n\n${lines}\n\nالإجمالي: ${total} ر.س`;
+    const message = `مرحباً، أود إتمام طلبي من snooffee:\n\n${lines}\n\nالإجمالي: ${total} د.إ`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -114,7 +114,7 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDra
                         </button>
                       </div>
                       <p className="text-sm font-extrabold text-coffee-900">
-                        {product.price * qty} <span className="text-xs font-bold text-coffee-500">ر.س</span>
+                        {product.price * qty} <span className="text-xs font-bold text-coffee-500">د.إ</span>
                       </p>
                     </div>
                   </div>
@@ -127,10 +127,10 @@ export function CartDrawer({ open, items, onClose, onSetQty, onRemove }: CartDra
               <div className="flex items-center justify-between">
                 <span className="font-bold text-coffee-700">الإجمالي</span>
                 <span className="font-display text-2xl font-extrabold text-coffee-900">
-                  {total} <span className="text-sm font-bold text-coffee-500">ر.س</span>
+                  {total} <span className="text-sm font-bold text-coffee-500">د.إ</span>
                 </span>
               </div>
-              <p className="mt-1 text-xs text-coffee-500">شحن مجاني للطلبات فوق 150 ر.س</p>
+              <p className="mt-1 text-xs text-coffee-500">شحن مجاني للطلبات فوق 200 د.إ</p>
               <button
                 onClick={checkout}
                 className="mt-4 w-full rounded-full bg-coffee-600 py-3.5 font-bold text-coffee-50 shadow-lg shadow-coffee-600/25 transition-colors hover:bg-coffee-700"

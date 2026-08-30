@@ -92,7 +92,7 @@ export function Products({ onAdd }: ProductsProps) {
                 <div className="mt-4 flex items-center justify-between border-t border-dashed border-coffee-200 pt-4">
                   <p className="font-display text-xl font-extrabold text-coffee-900">
                     {p.price}
-                    <span className="mr-1 text-sm font-bold text-coffee-500">ر.س</span>
+                    <span className="mr-1 text-sm font-bold text-coffee-500">د.إ</span>
                   </p>
                   <button
                     onClick={() => handleAdd(p)}
