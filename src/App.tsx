@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { Navbar } from '@/sections/Navbar';
 import { Hero } from '@/sections/Hero';
@@ -43,13 +43,11 @@ function loadCart(): CartItem[] {
 
 interface HomePageProps {
   cart: CartItem[];
-  setCart: (items: CartItem[]) => void;
-  cartOpen: boolean;
-  setCartOpen: (open: boolean) => void;
-  onCheckout: () => void;
+  setCart: (items: CartItem[] | ((prev: CartItem[]) => CartItem[])) => void;
+  onOpenCart: () => void;
 }
 
-function HomePage({ cart, setCart, cartOpen, setCartOpen, onCheckout }: HomePageProps) {
+function HomePage({ cart, setCart, onOpenCart }: HomePageProps) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart.map((i) => ({ id: i.product.id, qty: i.qty }))));
   }, [cart]);
@@ -69,7 +67,7 @@ function HomePage({ cart, setCart, cartOpen, setCartOpen, onCheckout }: HomePage
 
   return (
     <div className="min-h-screen bg-coffee-50">
-      <Navbar cartCount={cartCount} onOpenCart={() => setCartOpen(true)} />
+      <Navbar cartCount={cartCount} onOpenCart={onOpenCart} />
 
       <main>
         <Hero />
@@ -114,11 +112,6 @@ export default function App() {
     setAuth({ isLoggedIn: true, user });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setAuth({ isLoggedIn: false, user: null });
-  };
-
   return (
     <>
       <Routes>
@@ -140,13 +133,7 @@ function HomePageWrapper() {
 
   return (
     <>
-      <HomePage
-        cart={cart}
-        setCart={setCart}
-        cartOpen={cartOpen}
-        setCartOpen={setCartOpen}
-        onCheckout={() => navigate('/checkout')}
-      />
+      <HomePage cart={cart} setCart={setCart} onOpenCart={() => setCartOpen(true)} />
       <CartDrawer
         open={cartOpen}
         items={cart}
@@ -160,14 +147,13 @@ function HomePageWrapper() {
 }
 
 function CheckoutPage() {
-  const [cart, setCart] = useState<CartItem[]>(loadCart);
   const navigate = useNavigate();
+  const items = loadCart();
 
   return (
     <Checkout
-      items={cart}
-      onCheckoutComplete={(order) => {
-        setCart([]);
+      items={items}
+      onCheckoutComplete={() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
       }}
       onCancel={() => navigate('/')}
@@ -175,15 +161,14 @@ function CheckoutPage() {
   );
 }
 
-function setQty(id: string, qty: number, cart: CartItem[], setCart: (items: CartItem[]) => void) {
-  setCart(
+function setQty(id: string, qty: number, _cart: CartItem[], setCart: (items: CartItem[] | ((prev: CartItem[]) => CartItem[])) => void) {
+  setCart((prev: CartItem[]) =>
     qty <= 0
-      ? cart.filter((i) => i.product.id !== id)
-      : cart.map((i) => (i.product.id === id ? { ...i, qty } : i)),
+      ? prev.filter((i) => i.product.id !== id)
+      : prev.map((i) => (i.product.id === id ? { ...i, qty } : i)),
   );
 }
 
-function removeItem(id: string, cart: CartItem[], setCart: (items: CartItem[]) => void) {
-  setCart(cart.filter((i) => i.product.id !== id));
-}
+function removeItem(id: string, _cart: CartItem[], setCart: (items: CartItem[] | ((prev: CartItem[]) => CartItem[])) => void) {
+  setCart((prev: CartItem[]) => prev.filter((i) => i.product.id !== id));
 }

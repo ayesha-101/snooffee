@@ -12,7 +12,7 @@ const checkoutSchema = z.object({
   phone: z.string().min(7, 'رقم الهاتف غير صحيح'),
   address: z.string().min(5, 'العنوان مطلوب'),
   notes: z.string().optional(),
-  paymentMethod: z.enum(['cod', 'apple_pay'], { errorMap: () => ({ message: 'اختر طريقة دفع' }) }),
+  paymentMethod: z.enum(['cod', 'apple_pay']),
 });
 
 type CheckoutData = z.infer<typeof checkoutSchema>;
