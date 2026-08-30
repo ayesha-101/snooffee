@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { ArrowRight, CreditCard, Banknote } from 'lucide-react';
 import type { CartItem } from '@/sections/CartDrawer';
+import { sendEmailNotification, getOrderConfirmationEmail } from '@/lib/email-service';
+import { createOrder } from '@/lib/order-api';
 
 const checkoutSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صحيح'),
@@ -57,8 +59,8 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
         address: data.address,
         notes: data.notes || '',
         paymentMethod: data.paymentMethod,
-        paymentStatus: data.paymentMethod === 'apple_pay' ? 'pending' : 'pending',
-        status: 'pending',
+        paymentStatus: 'pending' as const,
+        status: 'pending' as const,
         totalPrice: finalTotal,
         items: items.map((item) => ({
           productId: item.product.id,
@@ -72,25 +74,30 @@ export function Checkout({ items, onCheckoutComplete, onCancel }: CheckoutProps)
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Save to localStorage
-      const existingOrders = localStorage.getItem('orders');
-      const orders = existingOrders ? JSON.parse(existingOrders) : [];
-      orders.push(order);
-      localStorage.setItem('orders', JSON.stringify(orders));
-
       // Update user data with contact info
       const user = localStorage.getItem('user');
+      let userData = { name: '', email: data.email };
       if (user) {
         const parsedUser = JSON.parse(user);
-        localStorage.setItem('user', JSON.stringify({
+        userData = {
           ...parsedUser,
           phone: data.phone,
           address: data.address,
-        }));
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
       }
 
-      toast.success('تم تأكيد الطلب بنجاح!');
-      onCheckoutComplete(order);
+      // Create order using API
+      const createdOrder = createOrder({
+        ...order,
+      });
+
+      // Send order confirmation email
+      const emailNotification = getOrderConfirmationEmail(createdOrder, userData);
+      await sendEmailNotification(emailNotification);
+
+      toast.success('تم تأكيد الطلب بنجاح! تحقق من بريدك الإلكتروني للتأكيد.');
+      onCheckoutComplete(createdOrder);
       navigate('/dashboard');
     } catch (error) {
       toast.error('حدث خطأ أثناء معالجة الطلب');

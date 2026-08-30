@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ShoppingBag, MapPin, Phone, Mail } from 'lucide-react';
 import { toast } from 'sonner';
+import { getUserOrders } from '@/lib/order-api';
 
 interface Order {
   id: string;
@@ -39,33 +40,9 @@ export function CustomerDashboard() {
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
 
-    // Mock orders data - replace with API call
-    const mockOrders: Order[] = [
-      {
-        id: '1',
-        orderNo: 'ORD-001',
-        totalPrice: 450,
-        status: 'delivered',
-        paymentMethod: 'cod',
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        items: [
-          { productName: 'قهوة اسبريسو', quantity: 2, price: 150 },
-          { productName: 'قهوة فلتر', quantity: 1, price: 150 },
-        ],
-      },
-      {
-        id: '2',
-        orderNo: 'ORD-002',
-        totalPrice: 200,
-        status: 'shipped',
-        paymentMethod: 'apple_pay',
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        items: [
-          { productName: 'قهوة مختصة', quantity: 1, price: 200 },
-        ],
-      },
-    ];
-    setOrders(mockOrders);
+    // Fetch user's orders from storage
+    const userOrders = getUserOrders(parsedUser.email);
+    setOrders(userOrders as Order[]);
     setLoading(false);
   }, [navigate]);
 

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Mail, Lock, User, Phone, MapPin } from 'lucide-react';
+import { sendEmailNotification, getAccountCreatedEmail } from '@/lib/email-service';
 
 const loginSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صحيح'),
@@ -52,13 +53,19 @@ export function Auth({ onLoginSuccess }: AuthPageProps) {
 
   const handleRegister = async (data: RegisterData) => {
     try {
-      localStorage.setItem('user', JSON.stringify({
+      const userData = {
         email: data.email,
         name: data.name,
         phone: data.phone,
         address: data.address,
-      }));
-      toast.success('تم التسجيل بنجاح');
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Send welcome email
+      const emailNotification = getAccountCreatedEmail(userData);
+      await sendEmailNotification(emailNotification);
+
+      toast.success('تم التسجيل بنجاح! تحقق من بريدك الإلكتروني.');
       onLoginSuccess?.({ email: data.email, name: data.name });
     } catch (error) {
       toast.error('فشل التسجيل');
