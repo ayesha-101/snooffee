@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { Navbar } from '@/sections/Navbar';
 import { Hero } from '@/sections/Hero';
@@ -108,12 +108,12 @@ function HomePage() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
       <Toaster position="bottom-center" dir="rtl" richColors />
-    </BrowserRouter>
+    </>
   );
 }
